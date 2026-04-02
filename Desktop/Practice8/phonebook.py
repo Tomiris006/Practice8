@@ -1,5 +1,6 @@
 from connect import connect
 
+# -------------------- Search --------------------
 def call_search():
     conn = connect()
     cur = conn.cursor()
@@ -15,6 +16,7 @@ def call_search():
     conn.close()
 
 
+# -------------------- Add/Update --------------------
 def call_upsert():
     conn = connect()
     cur = conn.cursor()
@@ -29,6 +31,7 @@ def call_upsert():
     conn.close()
 
 
+# -------------------- Pagination --------------------
 def call_pagination():
     conn = connect()
     cur = conn.cursor()
@@ -36,7 +39,10 @@ def call_pagination():
     limit = int(input("Limit: "))
     offset = int(input("Offset: "))
 
-    cur.execute("SELECT * FROM get_contacts_paginated(%s, %s)", (limit, offset))
+    cur.execute(
+        "SELECT * FROM get_contacts_paginated(%s, %s) ORDER BY id ASC",
+        (limit, offset)
+    )
     rows = cur.fetchall()
 
     for row in rows:
@@ -45,7 +51,7 @@ def call_pagination():
     cur.close()
     conn.close()
 
-
+# -------------------- Delete --------------------
 def call_delete():
     conn = connect()
     cur = conn.cursor()
@@ -58,7 +64,8 @@ def call_delete():
     conn.close()
 
 
-def call_insert_many():
+# -------------------- Insert Many --------------------
+def insert_many():
     conn = connect()
     cur = conn.cursor()
 
@@ -68,10 +75,18 @@ def call_insert_many():
     cur.execute("CALL insert_many_contacts(%s, %s)", (names, phones))
     conn.commit()
 
+    # показать все контакты после вставки по порядку ID
+    cur.execute("SELECT * FROM contacts ORDER BY id ASC")
+    rows = cur.fetchall()
+    print("\nAll contacts after Insert Many (ordered by ID):")
+    for row in rows:
+        print(row)
+
     cur.close()
     conn.close()
 
 
+# -------------------- Menu --------------------
 def menu():
     while True:
         print("""
@@ -94,9 +109,12 @@ def menu():
         elif choice == "4":
             call_delete()
         elif choice == "5":
-            call_insert_many()
+            insert_many()  # исправлено здесь
         elif choice == "6":
             break
+        else:
+            print("Invalid choice")
 
 
+# -------------------- Start --------------------
 menu()
